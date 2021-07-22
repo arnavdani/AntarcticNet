@@ -6,10 +6,20 @@ import torchvision.transforms as transforms
 from torchvision import datasets, models
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+
+import os
+from antarcticplotdataset import AntarcticPlotDataset
 
 
 
-batch_size = 32
+txt_file_adr = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/percent_cover_for_pytorch_set4.txt"
+
+textfile = open(txt_file_adr, "r")
+
+
+
+batch_size = 7
 num_workers = 0
 
 # define transforms:
@@ -18,27 +28,34 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 
 
 
-train_transform = transforms.Compose([transforms.RandomResizedCrop(224), transforms.RandomHorizontalFlip(),
-                  transforms.RandomRotation(10), transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
+train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
+                  transforms.RandomRotation(20), transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                   transforms.ToTensor(), normalize])
 
 
-test_transform = transforms.Compose([transforms.RandomResizedCrop(256), transforms.CenterCrop(224), transforms.ToTensor(), normalize])
+test_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
-# define datasets - FIX THIS:
-train_data = datasets.ImageFolder("./output_data_rocks", transform=train_transform)
-val_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
+
+train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/output_data_set4'
+
+
+train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform)
+val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform)
+
+
 #test_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
 
-# define dataloaders:
-train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, num_workers=num_workers, shuffle=True)
-val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, num_workers=num_workers, shuffle=False)
+train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size, shuffle=True, num_workers = 0)
+
+#val_loader = torch.utils.data.DataLoader(val_data, batch_size = batch_size, shuffle=True, num_workers = 0)
+
+                                                                                                                
 #test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, shuffle=False)
 
 
 
-model = models.resnet18(pretrained=True)
-model.fc = nn.Linear(in_features=512, out_features=11)
+model = models.squeezenet1_0(pretrained=True)
+model.fc = nn.Linear(in_features=512, out_features=9)
 
 
 
@@ -51,7 +68,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
 PATH = "./model.pt"
-#FIX THIS
+torch.save(model, PATH)
 
 
 
@@ -74,7 +91,10 @@ for epoch in range(n_epochs):
     # train the model #
     ###################
     for iter, (data, target) in enumerate(train_loader):  
-        #print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
+        
+        
+        
+        print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
         # clear the gradients of all optimized variables
         optimizer.zero_grad()
         # forward pass: compute predicted outputs by passing inputs to the model
@@ -111,7 +131,7 @@ for epoch in range(n_epochs):
             correct += (predicted == target).sum().item()
 
     #print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
-s
+
     PATH = "./model.pt"
     #change this
     torch.save(model, PATH)
