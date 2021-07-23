@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 import os
-from antarcticplotdataset import AntarcticPlotDataset
+from antarcticplotdataset_iterable import AntarcticPlotDataset
 
 
 
@@ -39,13 +39,13 @@ test_transform = transforms.Compose([transforms.ToTensor(), normalize])
 train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/output_data_set4'
 
 
-train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform)
-val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform)
+train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform, start=0, end=27)
+val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform, start=0, end=27)
 
 
 #test_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
 
-train_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size, shuffle=True, num_workers = 0)
+train_loader = torch.utils.data.DataLoader(train_data, num_workers = 0)
 
 #val_loader = torch.utils.data.DataLoader(val_data, batch_size = batch_size, shuffle=True, num_workers = 0)
 
