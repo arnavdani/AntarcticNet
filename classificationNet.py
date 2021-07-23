@@ -13,7 +13,7 @@ from antarcticplotdataset_iterable import AntarcticPlotDataset
 
 
 
-txt_file_adr = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/percent_cover_for_pytorch_set4.txt"
+txt_file_adr = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contourdata.txt"
 
 textfile = open(txt_file_adr, "r")
 
@@ -36,7 +36,7 @@ train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
 test_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
 
-train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/output_data_set4'
+train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contours'
 
 
 train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform, start=0, end=27)
@@ -96,16 +96,28 @@ for epoch in range(n_epochs):
         data = sample['image']
         target = sample['landmarks']
         
-        data = torch.tensor(data)
+        trans = transforms.ToPILImage()
+        trans1 = transforms.ToTensor()
+        
+        target1 = torch.tensor([5])
+
+        #target1 = map(torch.tensor, target1)
+        #print(list(target1))
+        #fix later
         
         
-        print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
+        pil_data = trans1(trans(data))
+        input_img = pil_data.unsqueeze(0)
+        
+        print("Epoch:", epoch, "Iteration:", i, "out of:", n_iterations)
         # clear the gradients of all optimized variables
         optimizer.zero_grad()
         # forward pass: compute predicted outputs by passing inputs to the model
-        outputs = model(data)
+        #outputs = model(pil_data)
+        outputs = model(input_img)
+        #print(outputs)
         # calculate the loss
-        loss = criterion(outputs, target)
+        loss = criterion(outputs, target1)
         
         # backward pass: compute gradient of the loss with respect to model parameters
         loss.backward()
@@ -113,7 +125,7 @@ for epoch in range(n_epochs):
         optimizer.step()
         
         # update running training loss
-        train_loss += loss.item()*data.size(0)
+        train_loss += loss.item()*pil_data.size(0)
       
     # if you have a learning rate scheduler - perform a its step in here
     scheduler.step()
@@ -122,18 +134,18 @@ for epoch in range(n_epochs):
     train_loss = train_loss/len(train_loader.dataset)
 
     print('Epoch: {} \tTraining Loss: {:.6f}'.format(epoch+1, train_loss))
-
+    epoch = epoch + 1
     # Run the test pass:
     correct = 0
     total = 0
     model.eval()  # prep model for validation
 
     with torch.no_grad():
-        for data, target in val_loader:
+        for data, target1 in val_loader:
             outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)
-            total += target.size(0)
-            correct += (predicted == target).sum().item()
+            total += target1.size(0)
+            correct += (predicted == target1).sum().item()
 
     #print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
 
