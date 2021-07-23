@@ -1,13 +1,13 @@
 import pandas as pd
 import torchvision.io 
-from torch.utils.data import TensorDataset, DataLoader, Dataset
+from torch.utils.data import TensorDataset, DataLoader, Dataset, IterableDataset
 import os
 from skimage import io
 import cv2
 import numpy as np  
 
 
-class AntarcticPlotDataset(Dataset):
+class AntarcticPlotDataset(IterableDataset):
     
     
     newdata = []
@@ -28,32 +28,15 @@ class AntarcticPlotDataset(Dataset):
             #print(os.path.join(root_dir, imgname))
             img = io.imread(os.path.join(root_dir, imgname))
             img = np.array(img)
-            #cv2.imshow("Image with background removed", img)
-            #cv2.waitKey(0)
-            
-            
-            # print(img)
-            #if (img == None):
-                #print(imgname)
-                #break
-            #else:
-                #print("image is loaded")
-            
-            
-            
-            
-            
-            
+                       
             finaldata.append(img)
             
             for i in range(9):
                 
                 finaldata.append(infolist[i+1].split("-")[1].strip('\n'))
-                
             
             self.newdata.append(finaldata)
-            #print(len(finaldata))
-            #print(finaldata)
+
 
             
             
@@ -76,6 +59,10 @@ class AntarcticPlotDataset(Dataset):
             landmarks = self.newdata[i]
             sample = {'image': img, 'landmarks': landmarks}
             return sample
+        
+    
+    
+        
 
     
     
