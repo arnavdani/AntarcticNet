@@ -38,7 +38,7 @@ class AntarcticPlotDataset(IterableDataset):
             
             for i in range(9):
                 
-                finaldata.append(infolist[i+1].split("-")[1].strip('\n'))
+                finaldata.append(float(infolist[i+1].split("-")[1].strip('\n')))
             
             self.newdata.append(finaldata)
 
@@ -52,7 +52,7 @@ class AntarcticPlotDataset(IterableDataset):
     
     def __getitem__(self, i):
         
-         print("get item was called on index " + str(i))
+         #print("get item was called on index " + str(i))
         
          #cut off all except 0th index
          if (i < 0 or i > len(self.newdata)):
@@ -72,7 +72,7 @@ class AntarcticPlotDataset(IterableDataset):
     
     def __iter__(self):
         
-        print("iter was called")
+        #print("iter was called")
         worker_info = torch.utils.data.get_worker_info()
         if worker_info is None:
             
