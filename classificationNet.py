@@ -90,8 +90,13 @@ for epoch in range(n_epochs):
     ###################
     # train the model #
     ###################
-    for iter, (data, target) in enumerate(train_loader):  
+    for i in train_data:  
         
+        sample = train_data[i]
+        data = sample['image']
+        target = sample['landmarks']
+        
+        data = torch.tensor(data)
         
         
         print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
