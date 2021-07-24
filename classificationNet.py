@@ -13,7 +13,7 @@ from antarcticplotdataset_iterable import AntarcticPlotDataset
 
 
 
-txt_file_adr = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contourdata.txt"
+txt_file_adr = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contourdata_test.txt"
 
 textfile = open(txt_file_adr, "r")
 
@@ -28,24 +28,24 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 
 
 
-train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
+train_transform = transforms.Compose([transforms.Resize(224), transforms.RandomHorizontalFlip(),
                   transforms.RandomRotation(20), transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                   transforms.ToTensor(), normalize])
 
 
-test_transform = transforms.Compose([transforms.ToTensor(), normalize])
+test_transform = transforms.Compose([transforms.ToTensor(), normalize]) 
 
 
 train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contours'
 
 
-train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform, start=0, end=27)
-val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform, start=0, end=27)
+train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform)
+val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform)
 
 
 #test_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
 
-train_loader = torch.utils.data.DataLoader(train_data, num_workers = 0)
+train_loader = torch.utils.data.DataLoader(train_data, num_workers = 0, batch_size=batch_size)
 
 #val_loader = torch.utils.data.DataLoader(val_data, batch_size = batch_size, shuffle=True, num_workers = 0)
 
@@ -67,7 +67,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 # specify scheduler
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
-PATH = "./model.pt"
+PATH = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/model.pt"
 torch.save(model, PATH)
 
 
@@ -90,30 +90,21 @@ for epoch in range(n_epochs):
     ###################
     # train the model #
     ###################
-    for i in train_data:  
+    for iter, (data, target) in enumerate(train_loader):  
         
-        sample = train_data[i]
-        data = sample['image']
-        target = sample['landmarks']
-        
+        print(type(data))
         trans = transforms.ToPILImage()
+        data = trans(data)
         trans1 = transforms.ToTensor()
+        data = trans1(data)
+        input_img = data.unsqueeze(0)
         
-        target1 = torch.tensor([5])
-
-        #target1 = map(torch.tensor, target1)
-        #print(list(target1))
-        #fix later
-        
-        
-        pil_data = trans1(trans(data))
-        input_img = pil_data.unsqueeze(0)
-        
-        print("Epoch:", epoch, "Iteration:", i, "out of:", n_iterations)
+        print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
         # clear the gradients of all optimized variables
         optimizer.zero_grad()
         # forward pass: compute predicted outputs by passing inputs to the model
         #outputs = model(pil_data)
+        print(type(input_img))
         outputs = model(input_img)
         #print(outputs)
         # calculate the loss
@@ -141,7 +132,7 @@ for epoch in range(n_epochs):
     model.eval()  # prep model for validation
 
     with torch.no_grad():
-        for data, target1 in val_loader:
+        for data, target in val_loader:
             outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)
             total += target1.size(0)
