@@ -11,38 +11,71 @@ import cv2
 from PIL import Image
 import torchvision.transforms as transforms
 
-
+# reference - Dataset is the superclass that is being extended and overridden
 class AntarcticPlotDataset(Dataset):
     
-    
+    #initializing the master array
     newdata = []
     
     def __init__(self, txt_file, root_dir, transform=None):
         
         
+        #directory where all the images are
         self.root_dir = root_dir
+        
+        #transforms to do on the images
         self.transform = transform
+        
+        #init
         self.newdata = []
+        
+        
+        #counter for next() method, no longer used
         self.counter = -1
         
+        #text file w/ target data for the images
         photoData = txt_file
+        
+        
+        
+        #reading the text file line by line 
+        
         for line in photoData:
             info = line
-            infolist = info.split(" ")
-            finaldata = []
-            imgname = infolist[0]
-            rawImg = imgname.split("-")[0]
-            #print(os.path.join(root_dir, imgname))
-            img_dir = os.path.join(root_dir, rawImg)
-            img = io.imread(os.path.join(img_dir, imgname))
-            img = np.array(img)
             
+    
+            infolist = info.split(" ")
+            
+            #data from one line
+            finaldata = []
+            
+            #since all the sub images for one image rest in a master folder, need to get inside that folder
+            imgname = infolist[0]
+            
+            #seperating the .png from the image name
+            rawImg = imgname.split("-")[0]
+            
+            #going into the folder named after the prent image
+            img_dir = os.path.join(root_dir, rawImg)
+            
+            #using the text file to get the name of the image
+            img = io.imread(os.path.join(img_dir, imgname))
+            
+            
+            #formatting and transforming the images
+            img = np.array(img)
             trans = transforms.ToPILImage()
             img = trans(img)
             img = self.transform(img)
             finaldata.append(img)
+            
+            
+            
+            #extracting the target data and adding it to the array for the line
             finaldata.append(int(info.split(":")[1].strip('\n')))
             
+            
+            #adding the information from one line to the full master array
             self.newdata.append(finaldata)
 
 
@@ -55,27 +88,39 @@ class AntarcticPlotDataset(Dataset):
     
     def __getitem__(self, i):
         
-         #print("get item was called on index " + str(i))
+         #gets the ith item in newdata
         
-         #cut off all except 0th index
+         #error check
          if (i < 0 or i > len(self.newdata)):
             print("problem")
             return None
         
-         else:       
+         else:
+            
+            #extracting image      
             img = self.newdata[i][0]
             
-            #landmarks = self.newdata.iloc[i, 1:]
-            self.newdata[i].pop(0)
-            landmarks = self.newdata[i]
-            target = [landmarks]
-            target = torch.tensor(target)
-            #sample = {'image': img, 'landmarks': landmarks}
+            #extracting target
+            landmarks = int(self.newdata[i][1])
+            
+            #storing both image in target in a dictionary format
             sample = {'image' : img, 'landmarks' : landmarks}
             
+            #returning the dictionary - the enumerator wants a dictionary object
             return sample
         
     
+    
+    
+    
+                              ######################################################
+                              ######################################################
+    ############################ EVERYTHING BELOW THIS IS OLD STUFF/GARBAGE ################################
+                              ######################################################
+                              ######################################################
+    
+    
+    #FOR ITERABLE DATASET, NOT USED 
     def __iter__(self):
         
         print("iter was called")
