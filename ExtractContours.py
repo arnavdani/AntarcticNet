@@ -5,14 +5,14 @@ import os
 
 
 
-dir_path = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/output_data_rocks'
+dir_path = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_data'
 
 
 save_path = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contours'
 
 
 
-img_data = open("contourdata.txt", "w+")
+img_data = open("C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contourdata.txt", "w+")
     
 for filename in os.listdir(dir_path):
     
@@ -34,7 +34,7 @@ for filename in os.listdir(dir_path):
     
 
     # apply binary thresholding
-    ret, thresh = cv2.threshold(img_gray, 140, 255, cv2.THRESH_BINARY)
+    ret, thresh = cv2.threshold(img_gray, 150, 255, cv2.THRESH_BINARY)
     #ret2, thres2 = cv2.threshold(img_gray, 70, 255, cv2.THRESH_BINARY)
     
 
@@ -87,7 +87,7 @@ for filename in os.listdir(dir_path):
             
             
             
-            newName = rawName + "contour_" + str(counter)
+            newName = rawName + "-contour_" + str(counter)
             newAdr = newName + ".png"
             counter = counter + 1
         
