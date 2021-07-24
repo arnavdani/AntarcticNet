@@ -7,38 +7,41 @@ import cv2
 import numpy as np 
 import math
 import torch
+import cv2
+from PIL import Image
+import torchvision.transforms as transforms
 
 
-class AntarcticPlotDataset(IterableDataset):
+class AntarcticPlotDataset(Dataset):
     
     
     newdata = []
     
-    def __init__(self, txt_file, root_dir, transform=None, start=0, end=27):
+    def __init__(self, txt_file, root_dir, transform=None):
         
         
         self.root_dir = root_dir
         self.transform = transform
         self.newdata = []
-        self.start = start
-        self.end = end
         self.counter = -1
         
         photoData = txt_file
         for line in photoData:
             info = line
-            infolist = info.split(",")
+            infolist = info.split(" ")
             finaldata = []
-            imgname = infolist[0] + ".jpg"
+            imgname = infolist[0]
+            rawImg = imgname.split("-")[0]
             #print(os.path.join(root_dir, imgname))
-            img = io.imread(os.path.join(root_dir, imgname))
+            img_dir = os.path.join(root_dir, rawImg)
+            img = io.imread(os.path.join(img_dir, imgname))
             img = np.array(img)
-                       
-            finaldata.append(img)
             
-            for i in range(9):
-                
-                finaldata.append(float(infolist[i+1].split("-")[1].strip('\n')))
+            trans = transforms.ToPILImage()
+            img = trans(img)
+            img = self.transform(img)
+            finaldata.append(img)
+            finaldata.append(int(info.split(":")[1].strip('\n')))
             
             self.newdata.append(finaldata)
 
@@ -61,19 +64,24 @@ class AntarcticPlotDataset(IterableDataset):
         
          else:       
             img = self.newdata[i][0]
+            
             #landmarks = self.newdata.iloc[i, 1:]
             self.newdata[i].pop(0)
             landmarks = self.newdata[i]
-            landmarks = np.asarray(landmarks)
+            target = [landmarks]
+            target = torch.tensor(target)
             #sample = {'image': img, 'landmarks': landmarks}
             sample = {'image' : img, 'landmarks' : landmarks}
+            
             return sample
         
     
     def __iter__(self):
         
-        #print("iter was called")
+        print("iter was called")
         worker_info = torch.utils.data.get_worker_info()
+        self.start = 5
+        self.end = 4
         if worker_info is None:
             
             iter_start = self.start
