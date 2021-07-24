@@ -7,6 +7,7 @@ from torchvision import datasets, models
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+import cv2
 
 import os
 from antarcticplotdataset_iterable import AntarcticPlotDataset
@@ -19,7 +20,7 @@ textfile = open(txt_file_adr, "r")
 
 
 
-batch_size = 7
+batch_size = 5
 num_workers = 0
 
 # define transforms:
@@ -90,13 +91,14 @@ for epoch in range(n_epochs):
     ###################
     # train the model #
     ###################
-    for iter, (data, target) in enumerate(train_loader):  
+    for iter, D in enumerate(train_loader):  
         
-        print(type(data))
-        trans = transforms.ToPILImage()
-        data = trans(data)
-        trans1 = transforms.ToTensor()
-        data = trans1(data)
+        data = D['image']
+        target = D['landmarks']
+        
+        cv2.imshow("fsdfsf", data)
+        cv2.waitKey(350)
+        
         input_img = data.unsqueeze(0)
         
         print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
