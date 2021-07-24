@@ -48,7 +48,7 @@ val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform)
 
 train_loader = torch.utils.data.DataLoader(train_data, num_workers = 0, batch_size=batch_size)
 
-#val_loader = torch.utils.data.DataLoader(val_data, batch_size = batch_size, shuffle=True, num_workers = 0)
+val_loader = torch.utils.data.DataLoader(train_data, batch_size = batch_size, shuffle=True, num_workers = 0)
 
                                                                                                                 
 #test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, shuffle=False)
@@ -56,6 +56,7 @@ train_loader = torch.utils.data.DataLoader(train_data, num_workers = 0, batch_si
 
 
 model = models.squeezenet1_0(pretrained=True)
+
 model.fc = nn.Linear(in_features=512, out_features=9)
 
 
@@ -91,15 +92,18 @@ for epoch in range(n_epochs):
     ###################
     # train the model #
     ###################
+    
     for iter, D in enumerate(train_loader):  
         
         data = D['image']
         target = D['landmarks']
         
-        cv2.imshow("fsdfsf", data)
-        cv2.waitKey(350)
+
         
-        input_img = data.unsqueeze(0)
+        input_img = torch.tensor(data)
+        target = torch.tensor(target[0])
+        #input_img = input_img.unsqueeze(0)
+        #input_img = input_img.transpose((2, 0, 1))
         
         print("Epoch:", epoch, "Iteration:", iter, "out of:", n_iterations)
         # clear the gradients of all optimized variables
@@ -110,7 +114,7 @@ for epoch in range(n_epochs):
         outputs = model(input_img)
         #print(outputs)
         # calculate the loss
-        loss = criterion(outputs, target1)
+        loss = criterion(outputs, target)
         
         # backward pass: compute gradient of the loss with respect to model parameters
         loss.backward()
@@ -118,7 +122,7 @@ for epoch in range(n_epochs):
         optimizer.step()
         
         # update running training loss
-        train_loss += loss.item()*pil_data.size(0)
+        train_loss += loss.item()*input_img.size(0)
       
     # if you have a learning rate scheduler - perform a its step in here
     scheduler.step()
@@ -134,10 +138,18 @@ for epoch in range(n_epochs):
     model.eval()  # prep model for validation
 
     with torch.no_grad():
-        for data, target in val_loader:
+        for D in val_loader:
+            
+            data = D['image']
+            target = D['landmarks']
+            
+            data = torch.tensor(data)
+            target = torch.tensor(target)
+            
+            
             outputs = model(data)
             _, predicted = torch.max(outputs.data, 1)
-            total += target1.size(0)
+            total += target.size(0)
             correct += (predicted == target1).sum().item()
 
     #print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
