@@ -18,10 +18,14 @@ from antarcticplotdataset_iterable import AntarcticPlotDataset
 
 
 txt_file_adr = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contourdata_test.txt"
+txt_file_val = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contourdata_val.txt"
+
 train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contours'
+val_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/contours'
 
 
 textfile = open(txt_file_adr, "r")
+valtext = open(txt_file_val, "r")
 
 
 #### CONVERT DATA TO EXECUTABLE FORMAT ####
@@ -47,7 +51,7 @@ test_transform = transforms.Compose([transforms.Resize(224), transforms.ToTensor
 # define datasets:
 
 train_data = AntarcticPlotDataset(textfile, train_dir, transform=train_transform)
-val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform)
+validata = AntarcticPlotDataset(valtext, val_dir, transform=test_transform)
 
 
 #test_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
@@ -56,7 +60,7 @@ val_data = AntarcticPlotDataset(textfile, train_dir, transform=test_transform)
 
 train_loader = torch.utils.data.DataLoader(train_data, num_workers = 0, batch_size=batch_size)
 
-val_loader = torch.utils.data.DataLoader(val_data,  num_workers = 0, batch_size=batch_size)
+va_loader = torch.utils.data.DataLoader(validata,  num_workers = 0, batch_size=batch_size)
 
                                                                                                                 
 #test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, num_workers=num_workers, shuffle=False)
@@ -85,7 +89,7 @@ torch.save(model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 5
+n_epochs = 100
 n_iterations = int(len(train_data)/batch_size)
 
 # lists to keep track of training progress:
@@ -170,19 +174,16 @@ for epoch in range(n_epochs):
     
     
     with torch.no_grad(): #not exactly sure what this does
-        for iter, D in enumerate(val_loader):
-            
-            
-            
+        for iter, D in enumerate(va_loader):
+                        
+            #print(data)
+            #print(target)
             
             # extracting from dictionary 
             data = D['image']
             target = D['landmarks']
             
             # test prints
-            print("im here")
-            print(data)
-            print(target)
             
             
             # formatting data from the dict
@@ -199,7 +200,7 @@ for epoch in range(n_epochs):
             total += target.size(0)
             correct += (predicted == target).sum().item()
 
-    #print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
+    print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
 
     PATH = "./model.pt"
     torch.save(model, PATH)
