@@ -1488,5 +1488,165 @@ for epoch in range(n_epochs):
 traintext.close()
 valtext.close()
 
+
+
+#####################################################################################################################
+
+
+#algae on rocks, abbr alg
+
+
+train_alg = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
+val_alg = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+
+traintext = open(train_alg, "r")
+valtext = open(val_alg, "r")
+
+
+# define datasets:
+
+train_data_alg = AntarcticPlotDataset(traintext, train_dir, transform=train_transform)
+val_data_alg = AntarcticPlotDataset(valtext, val_dir, transform=test_transform)
+
+
+#test_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
+
+# load the data in batches: 
+
+tl_alg = torch.utils.data.DataLoader(train_data_alg, num_workers = 0, batch_size=batch_size, shuffle=False)
+
+vl_alg = torch.utils.data.DataLoader(val_data_alg,  num_workers = 0, batch_size=batch_size)
+
+
+# define model
+alg_model = models.squeezenet1_0(pretrained=False)
+alg_model.fc = nn.Linear(in_features=512, out_features=1)
+
+# save model
+PATH = os.path.join(model_dir, 'alg_model.pt')
+torch.save(alg_model, PATH)
+
+
+# number of epochs to train the model, number of iterations per epoch
+n_epochs = 2
+n_iterations = int(len(train_data_alg)/batch_size)
+
+# lists to keep track of training progress:
+train_loss_progress = []
+validation_accuracy_progress = []
+
+
+
+alg_model.train() # final step to prep model for training
+
+for epoch in range(n_epochs):
+    
+    # monitor training loss
+    train_loss = 0.0
+    
+    #load the model
+    alg_model = torch.load(PATH)
+    
+    #prep to train
+    alg_model.train()
+    
+    
+    ###################
+    # train the model #
+    ###################
+    
+    for iter, D in enumerate(tl_alg):  
+        
+        # extracting from dictionary 
+        data = D['image']
+        target = D['landmarks']
+        
+
+        # formatting and modifying output from dict
+        input_img = data
+        target = torch.tensor(target)
+
+                
+        #### TRAINING PROPER ####
+        #########################
+        
+        print("Epoch:", epoch + 1, "Iteration:", iter + 1, "out of:", n_iterations)
+        
+        # clear the gradients of all optimized variables
+        optimizer.zero_grad()
+        
+        # forward pass: compute predicted outputs by passing inputs to the model        
+        outputs = alg_model(input_img)
+        
+        # calculate the loss
+        loss = criterion(outputs, target)
+        
+        # backward pass: compute gradient of the loss with respect to model parameters
+        loss.backward()
+        
+        # perform a single optimization step (parameter update)
+        optimizer.step()
+        
+        # update running training loss
+        train_loss += loss.item()*input_img.size(0)
+      
+    #  scheduler - perform a its step in here - controls rate of learning
+    scheduler.step()
+    
+    # print training statistics - calculate average loss over an epoch
+    train_loss = train_loss/len(tl_alg.dataset)
+    print('Epoch: {} \tTraining Loss: {:.6f}'.format(epoch+1, train_loss))
+    
+    
+    ##################
+    #VALIDATION STAGE#
+    
+    # define variables
+    correct = 0
+    total = 0
+    
+    #prep for evaluation
+    alg_model.eval() 
+    
+    
+    
+    with torch.no_grad(): #not exactly sure what this does
+        for iter, D in enumerate(vl_alg):
+                        
+            #print(data)
+            #print(target)
+            
+            # extracting from dictionary 
+            data = D['image']
+            target = D['landmarks']
+            
+            # test prints
+            
+            
+            # formatting data from the dict
+            target = torch.tensor(target)
+            
+            
+            # VALIDATION PROPER
+            
+            # returns the output if < 1, else 1 - converts output to probability
+            outputs = alg_model(data)
+            _, predicted = torch.max(outputs.data, 1)
+            
+            # does the addition
+            total += target.size(0)
+            correct += (predicted == target).sum().item()
+
+    print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
+
+    torch.save(alg_model, PATH)
+
+
+traintext.close()
+valtext.close()
+
+
+
+
 #################################################################################################################
 #### THE END 
