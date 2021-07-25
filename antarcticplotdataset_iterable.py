@@ -51,12 +51,15 @@ class AntarcticPlotDataset(Dataset):
             
             #since all the sub images for one image rest in a master folder, need to get inside that folder
             imgname = infolist[0]
-            
+            print("HERE IS THE LINE " + info)
             #seperating the .png from the image name
-            rawImg = imgname.split("-")[0]
+            containingFolder = imgname.split("-")[0]
+            
             
             #going into the folder named after the prent image
-            img_dir = os.path.join(root_dir, rawImg)
+            img_dir = os.path.join(root_dir, containingFolder)
+            print(img_dir)
+            
             
             #using the text file to get the name of the image
             img = io.imread(os.path.join(img_dir, imgname))
