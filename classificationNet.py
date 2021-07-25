@@ -21,12 +21,12 @@ from antarcticplotdataset_iterable import AntarcticPlotDataset
 
 train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_subsets'
 val_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_subsets'
-model_dir = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/models/
+model_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/models/'
 
 
 
 #define batch size, num workers
-batch_size = 9
+batch_size = 64
 num_workers = 0
 
 # define transforms:
@@ -36,7 +36,7 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 
 
 train_transform = transforms.Compose([transforms.Resize((224,224)), transforms.RandomHorizontalFlip(),
-                  transforms.RandomRotation(20), transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
+                  transforms.RandomRotation(20), transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0),
                   transforms.ToTensor(), normalize])
 
 
