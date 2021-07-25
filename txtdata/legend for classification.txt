@@ -1,0 +1,27 @@
+LEGEND
+
+
+0 = ROCK
+1 = SOIL
+2 = MORIBUND MOSS
+3 = WHITE LICHEN
+4 = BRYUM SPO./DEAD MOSS/RANDOM
+5 = SANIONIA/BROWN MOSS
+6 = HAIRGRASS
+7 = POLYTRICHIUM STRICTUM
+8 = CHORISODONTIUM ACIPHYLLUM
+9 = BROWN LICHEN
+10 = ALGAE ON ROCKS
+
+
+0 - rock
+1 - soil
+2 - momo
+3 - whli
+4 - rand
+5 - brmo
+6 - gras
+7 - pomo
+8 - chmo
+9 - brli
+10 - alga
