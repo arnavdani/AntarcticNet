@@ -22,6 +22,8 @@ from antarcticplotdataset_iterable import AntarcticPlotDataset
 train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_subsets'
 val_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_subsets'
 model_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/models/'
+tf_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfiles/trainingfile_'
+vf_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/valfiles/valfile_'
 
 
 
@@ -47,8 +49,8 @@ test_transform = transforms.Compose([transforms.Resize((224,224)), transforms.To
 
 
 
-train_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_rock = os.path.join(tf_dir, 'rock.txt')
+val_rock = os.path.join(vf_dir, 'rock.txt')
 
 traintext = open(train_rock, "r")
 valtext = open(val_rock, "r")
@@ -77,17 +79,17 @@ vl_rock = torch.utils.data.DataLoader(val_data_rock,  num_workers = 0, batch_siz
 
 # define model
 
-rock_model = models.squeezenet1_0(pretrained=False)
+rock_model = models.resnet18(pretrained=False)
 rock_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # specify loss function
-criterion = nn.CrossEntropyLoss()
+criterion = nn.BCEWithLogitsLoss()
 
 # specify optimizer
-optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.3, momentum=0.95)
+optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.001, momentum=0.95)
 
 # specify scheduler
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.01)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.01)
 
 # save model
 PATH = os.path.join(model_dir, 'rock_model.pt')
@@ -95,7 +97,7 @@ torch.save(rock_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
+n_epochs = 5
 n_iterations = int(len(train_data_rock)/batch_size)
 
 # lists to keep track of training progress:
@@ -228,8 +230,8 @@ valtext.close()
 #soil model
 
 
-train_soil = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_soil = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_soil = os.path.join(tf_dir, 'soil.txt')
+val_soil = os.path.join(vf_dir, 'soil.txt')
 
 traintext = open(train_soil, "r")
 valtext = open(val_soil, "r")
@@ -251,7 +253,7 @@ vl_soil = torch.utils.data.DataLoader(val_data_soil,  num_workers = 0, batch_siz
 
 
 # define model
-soil_model = models.squeezenet1_0(pretrained=False)
+soil_model = models.resnet18(pretrained=False)
 soil_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -260,7 +262,6 @@ torch.save(soil_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_soil)/batch_size)
 
 # lists to keep track of training progress:
@@ -388,8 +389,8 @@ valtext.close()
 
 
 
-train_WL = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_WL = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_WL = os.path.join(tf_dir, 'whli.txt')
+val_WL = os.path.join(vf_dir, 'whli.txt')
 
 traintext = open(train_WL, "r")
 valtext = open(val_WL, "r")
@@ -411,7 +412,7 @@ vl_WL = torch.utils.data.DataLoader(val_data_WL,  num_workers = 0, batch_size=ba
 
 
 # define model
-WL_model = models.squeezenet1_0(pretrained=False)
+WL_model = models.resnet18(pretrained=False)
 WL_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -420,7 +421,6 @@ torch.save(WL_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_WL)/batch_size)
 
 # lists to keep track of training progress:
@@ -545,8 +545,8 @@ valtext.close()
 #Bryum Spo/dead moss/other category
 
 
-train_bry = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_bry = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_bry = os.path.join(tf_dir, 'rand.txt')
+val_bry = os.path.join(vf_dir, 'rand.txt')
 
 traintext = open(train_bry, "r")
 valtext = open(val_bry, "r")
@@ -568,7 +568,7 @@ vl_bry = torch.utils.data.DataLoader(val_data_bry,  num_workers = 0, batch_size=
 
 
 # define model
-bryum_model = models.squeezenet1_0(pretrained=False)
+bryum_model = models.resnet18(pretrained=False)
 bryum_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -577,7 +577,6 @@ torch.save(bryum_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_bry)/batch_size)
 
 # lists to keep track of training progress:
@@ -704,8 +703,8 @@ valtext.close()
 
 
 
-train_san = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_san = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_san = os.path.join(tf_dir, 'brmo.txt')
+val_san = os.path.join(vf_dir, 'brmo.txt')
 
 traintext = open(train_san, "r")
 valtext = open(val_san, "r")
@@ -727,7 +726,7 @@ vl_san = torch.utils.data.DataLoader(val_data_san,  num_workers = 0, batch_size=
 
 
 # define model
-sanionia_model = models.squeezenet1_0(pretrained=False)
+sanionia_model = models.resnet18(pretrained=False)
 sanionia_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -736,7 +735,6 @@ torch.save(sanionia_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_san)/batch_size)
 
 # lists to keep track of training progress:
@@ -861,8 +859,8 @@ valtext.close()
 #hairgrass model
 
 
-train_grass = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_grass = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_grass = os.path.join(tf_dir, 'gras.txt')
+val_grass = os.path.join(vf_dir, 'gras.txt')
 
 traintext = open(train_grass, "r")
 valtext = open(val_grass, "r")
@@ -884,7 +882,7 @@ vl_grass = torch.utils.data.DataLoader(val_data_grass,  num_workers = 0, batch_s
 
 
 # define model
-grass_model = models.squeezenet1_0(pretrained=False)
+grass_model = models.resnet18(pretrained=False)
 grass_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -893,7 +891,6 @@ torch.save(grass_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_grass)/batch_size)
 
 # lists to keep track of training progress:
@@ -1021,8 +1018,8 @@ valtext.close()
 #abbr to PS, model name polytrich_model
 
 
-train_PS = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_PS = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_PS = os.path.join(tf_dir, 'pomo.txt')
+val_PS = os.path.join(vf_dir, 'pomo.txt')
 
 traintext = open(train_PS, "r")
 valtext = open(val_PS, "r")
@@ -1044,7 +1041,7 @@ vl_PS = torch.utils.data.DataLoader(val_data_PS,  num_workers = 0, batch_size=ba
 
 
 # define model
-polytrich_model = models.squeezenet1_0(pretrained=False)
+polytrich_model = models.resnet18(pretrained=False)
 polytrich_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -1053,7 +1050,6 @@ torch.save(polytrich_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_PS)/batch_size)
 
 # lists to keep track of training progress:
@@ -1181,8 +1177,8 @@ valtext.close()
 #abbr to chor, model name chor_model
 
 
-train_chor = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_chor = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_chor = os.path.join(tf_dir, 'chmo.txt')
+val_chor = os.path.join(vf_dir, 'chmo.txt')
 
 traintext = open(train_chor, "r")
 valtext = open(val_chor, "r")
@@ -1204,7 +1200,7 @@ vl_chor = torch.utils.data.DataLoader(val_data_chor,  num_workers = 0, batch_siz
 
 
 # define model
-chor_model = models.squeezenet1_0(pretrained=False)
+chor_model = models.resnet18(pretrained=False)
 chor_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -1213,7 +1209,6 @@ torch.save(chor_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_chor)/batch_size)
 
 # lists to keep track of training progress:
@@ -1339,8 +1334,8 @@ valtext.close()
 #brown lichen, abbr blichen
 
 
-train_blichen = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_blichen = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_blichen = os.path.join(tf_dir, 'brli.txt')
+val_blichen = os.path.join(vf_dir, 'brli.txt')
 
 traintext = open(train_blichen, "r")
 valtext = open(val_blichen, "r")
@@ -1362,7 +1357,7 @@ vl_blichen = torch.utils.data.DataLoader(val_data_blichen,  num_workers = 0, bat
 
 
 # define model
-blichen_model = models.squeezenet1_0(pretrained=False)
+blichen_model = models.resnet18(pretrained=False)
 blichen_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -1371,7 +1366,6 @@ torch.save(blichen_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_blichen)/batch_size)
 
 # lists to keep track of training progress:
@@ -1496,8 +1490,8 @@ valtext.close()
 #algae on rocks, abbr alg
 
 
-train_alg = #ADD TXT - "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/trainingfile.txt"
-val_alg = #ADD TXT "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/valfile.txt"
+train_alg = os.path.join(tf_dir, 'alga.txt')
+val_alg = os.path.join(vf_dir, 'alga.txt')
 
 traintext = open(train_alg, "r")
 valtext = open(val_alg, "r")
@@ -1519,7 +1513,7 @@ vl_alg = torch.utils.data.DataLoader(val_data_alg,  num_workers = 0, batch_size=
 
 
 # define model
-alg_model = models.squeezenet1_0(pretrained=False)
+alg_model = models.resnet18(pretrained=False)
 alg_model.fc = nn.Linear(in_features=512, out_features=1)
 
 # save model
@@ -1528,7 +1522,6 @@ torch.save(alg_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 2
 n_iterations = int(len(train_data_alg)/batch_size)
 
 # lists to keep track of training progress:
