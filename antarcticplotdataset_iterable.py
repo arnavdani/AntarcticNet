@@ -102,8 +102,9 @@ class AntarcticPlotDataset(Dataset):
             img = self.newdata[i][0]
             
             #extracting target
-            landmarks = int(self.newdata[i][1])
-            
+            landmarks = float(self.newdata[i][1])
+            target = []
+            target.append(landmarks)
             #storing both image in target in a dictionary format
             sample = {'image' : img, 'landmarks' : landmarks}
             
