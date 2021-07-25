@@ -47,8 +47,8 @@ test_transform = transforms.Compose([transforms.Resize((224,224)), transforms.To
 
 
 
-train_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfile_rock.txt"
-val_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/valfile_rock.txt"
+train_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfiles/trainingfile_rock.txt"
+val_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/valfiles/valfile_rock.txt"
 
 traintext = open(train_rock, "r")
 valtext = open(val_rock, "r")
@@ -84,10 +84,10 @@ rock_model.fc = nn.Linear(in_features=512, out_features=1)
 criterion = nn.BCEWithLogitsLoss()
 
 # specify optimizer
-optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.01, momentum=0.9)
+optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.001, momentum=0.9)
 
 # specify scheduler
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
 # save model
 PATH = os.path.join(model_dir, 'rock_model.pt')
@@ -204,18 +204,28 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = rock_model(data)
-            firstreturn, predicted = torch.max(outputs.data, 1)
+
+            
+            print(outputs)
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
             correct += (predicted == target).sum().item()
-            
-            #print("outputs size")
-            #print(outputs.size())
-            #print("first return")
-            #print(firstreturn)
-            #print("target")
-            #print(target)
+
+
 
     print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
 
