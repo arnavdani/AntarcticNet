@@ -64,7 +64,7 @@ val_data_rock = AntarcticPlotDataset(valtext, val_dir, transform=test_transform)
 
 # load the data in batches: 
 
-tl_rock = torch.utils.data.DataLoader(train_data_rock, num_workers = 0, batch_size=batch_size, shuffle=False)
+tl_rock = torch.utils.data.DataLoader(train_data_rock, num_workers = 0, batch_size=batch_size, shuffle=True)
 
 vl_rock = torch.utils.data.DataLoader(val_data_rock,  num_workers = 0, batch_size=batch_size)
 
@@ -196,6 +196,8 @@ for epoch in range(n_epochs):
             # test prints
             
             
+            
+            
             # formatting data from the dict
             target = torch.tensor(target)
             
@@ -206,7 +208,7 @@ for epoch in range(n_epochs):
             outputs = rock_model(data)
 
             
-            print(outputs)
+            #print(outputs)
             predicted, sp = torch.max(outputs.data, 1)
             
             presize = predicted.size()
