@@ -22,8 +22,8 @@ from antarcticplotdataset_iterable import AntarcticPlotDataset
 train_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_subsets'
 val_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/train_subsets'
 model_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/models/'
-tf_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfiles/trainingfile_'
-vf_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/valfiles/valfile_'
+tf_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfiles/'
+vf_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/valfiles/'
 
 
 
@@ -48,9 +48,11 @@ test_transform = transforms.Compose([transforms.Resize((224,224)), transforms.To
 ##### NET 1 - ROCKS
 
 
+print("net one of 11: rocks")
 
-train_rock = os.path.join(tf_dir, 'rock.txt')
-val_rock = os.path.join(vf_dir, 'rock.txt')
+
+train_rock = os.path.join(tf_dir, 'trainingfile_rock.txt')
+val_rock = os.path.join(vf_dir, 'valfile_rock.txt')
 
 traintext = open(train_rock, "r")
 valtext = open(val_rock, "r")
@@ -66,7 +68,7 @@ val_data_rock = AntarcticPlotDataset(valtext, val_dir, transform=test_transform)
 
 # load the data in batches: 
 
-tl_rock = torch.utils.data.DataLoader(train_data_rock, num_workers = 0, batch_size=batch_size, shuffle=False)
+tl_rock = torch.utils.data.DataLoader(train_data_rock, num_workers = 0, batch_size=batch_size, shuffle=True)
 
 vl_rock = torch.utils.data.DataLoader(val_data_rock,  num_workers = 0, batch_size=batch_size)
 
@@ -97,7 +99,7 @@ torch.save(rock_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 5
+n_epochs = 1
 n_iterations = int(len(train_data_rock)/batch_size)
 
 # lists to keep track of training progress:
@@ -133,6 +135,8 @@ for epoch in range(n_epochs):
         target = D['landmarks']
         
 
+        target = target.view(-1, 1)
+        
         # formatting and modifying output from dict
         input_img = data
         target = torch.tensor(target)
@@ -202,7 +206,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = rock_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -229,9 +246,11 @@ valtext.close()
 
 #soil model
 
+print("net 2 out of 11: soil")
 
-train_soil = os.path.join(tf_dir, 'soil.txt')
-val_soil = os.path.join(vf_dir, 'soil.txt')
+
+train_soil = os.path.join(tf_dir, 'trainingfile_soil.txt')
+val_soil = os.path.join(vf_dir, 'valfile_soil.txt')
 
 traintext = open(train_soil, "r")
 valtext = open(val_soil, "r")
@@ -294,6 +313,8 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        target = target.view(-1, 1)
+        
 
         # formatting and modifying output from dict
         input_img = data
@@ -353,6 +374,7 @@ for epoch in range(n_epochs):
             data = D['image']
             target = D['landmarks']
             
+            
             # test prints
             
             
@@ -364,7 +386,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = soil_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -381,16 +416,182 @@ valtext.close()
 
 
 
+
+#####################################################################################################################
+
+
+#moribund moss, abbr momo
+
+print("net 3 of 11: moribund moss")
+
+
+train_momo = os.path.join(tf_dir, 'trainingfile_momo.txt')
+val_momo = os.path.join(vf_dir, 'valfile_momo.txt')
+
+traintext = open(train_momo, "r")
+valtext = open(val_momo, "r")
+
+
+# define datasets:
+
+train_data_momo = AntarcticPlotDataset(traintext, train_dir, transform=train_transform)
+val_data_momo = AntarcticPlotDataset(valtext, val_dir, transform=test_transform)
+
+
+#test_data = datasets.ImageFolder("./output_data_rocks", transform=test_transform)
+
+# load the data in batches: 
+
+tl_momo = torch.utils.data.DataLoader(train_data_momo, num_workers = 0, batch_size=batch_size, shuffle=False)
+
+vl_momo = torch.utils.data.DataLoader(val_data_momo,  num_workers = 0, batch_size=batch_size)
+
+
+# define model
+momo_model = models.resnet18(pretrained=False)
+momo_model.fc = nn.Linear(in_features=512, out_features=1)
+
+# save model
+PATH = os.path.join(model_dir, 'momo_model.pt')
+torch.save(momo_model, PATH)
+
+
+# number of epochs to train the model, number of iterations per epoch
+n_iterations = int(len(train_data_momo)/batch_size)
+
+# lists to keep track of training progress:
+train_loss_progress = []
+validation_accuracy_progress = []
+
+
+
+momo_model.train() # final step to prep model for training
+
+for epoch in range(n_epochs):
+    
+    # monitor training loss
+    train_loss = 0.0
+    
+    #load the model
+    momo_model = torch.load(PATH)
+    
+    #prep to train
+    momo_model.train()
+    
+    
+    ###################
+    # train the model #
+    ###################
+    
+    for iter, D in enumerate(tl_momo):  
+        
+        # extracting from dictionary 
+        data = D['image']
+        target = D['landmarks']
+        
+
+        target = target.view(-1, 1)
+        
+        # formatting and modifying output from dict
+        input_img = data
+        target = torch.tensor(target)
+
+                
+        #### TRAINING PROPER ####
+        #########################
+        
+        print("Epoch:", epoch + 1, "Iteration:", iter + 1, "out of:", n_iterations)
+        
+        # clear the gradients of all optimized variables
+        optimizer.zero_grad()
+        
+        # forward pass: compute predicted outputs by passing inputs to the model        
+        outputs = momo_model(input_img)
+        
+        # calculate the loss
+        loss = criterion(outputs, target)
+        
+        # backward pass: compute gradient of the loss with respect to model parameters
+        loss.backward()
+        
+        # perform a single optimization step (parameter update)
+        optimizer.step()
+        
+        # update running training loss
+        train_loss += loss.item()*input_img.size(0)
+      
+    #  scheduler - perform a its step in here - controls rate of learning
+    scheduler.step()
+    
+    # print training statistics - calculate average loss over an epoch
+    train_loss = train_loss/len(tl_momo.dataset)
+    print('Epoch: {} \tTraining Loss: {:.6f}'.format(epoch+1, train_loss))
+    
+    
+    ##################
+    #VALIDATION STAGE#
+    
+    # define variables
+    correct = 0
+    total = 0
+    
+    #prep for evaluation
+    momo_model.eval() 
+    
+    
+    
+    with torch.no_grad(): #not exactly sure what this does
+        for iter, D in enumerate(vl_momo):
+                        
+            #print(data)
+            #print(target)
+            
+            # extracting from dictionary 
+            data = D['image']
+            target = D['landmarks']
+            
+            # test prints
+            
+            
+            # formatting data from the dict
+            target = torch.tensor(target)
+            
+            
+            # VALIDATION PROPER
+            
+            # returns the output if < 1, else 1 - converts output to probability
+            outputs = momo_model(data)
+            _, predicted = torch.max(outputs.data, 1)
+            
+            # does the addition
+            total += target.size(0)
+            correct += (predicted == target).sum().item()
+
+    print('Accuracy of the network on the validation set: %d %%' % (100 * correct / total))
+
+    torch.save(momo_model, PATH)
+
+
+traintext.close()
+valtext.close()
+
+
+
+
+
+
 #####################################################################################################################
 
 
 
 #white lichen model
 
+print("net 4 out of 11: white lichen")
 
 
-train_WL = os.path.join(tf_dir, 'whli.txt')
-val_WL = os.path.join(vf_dir, 'whli.txt')
+
+train_WL = os.path.join(tf_dir, 'trainingfile_whli.txt')
+val_WL = os.path.join(vf_dir, 'valfile_whli.txt')
 
 traintext = open(train_WL, "r")
 valtext = open(val_WL, "r")
@@ -453,6 +654,8 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        target = target.view(-1, 1)
+        
 
         # formatting and modifying output from dict
         input_img = data
@@ -512,6 +715,7 @@ for epoch in range(n_epochs):
             data = D['image']
             target = D['landmarks']
             
+            
             # test prints
             
             
@@ -523,7 +727,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = WL_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -544,9 +761,11 @@ valtext.close()
 
 #Bryum Spo/dead moss/other category
 
+print("net 5 out of 11: bryum spo, dead moss, and other random things")
 
-train_bry = os.path.join(tf_dir, 'rand.txt')
-val_bry = os.path.join(vf_dir, 'rand.txt')
+
+train_bry = os.path.join(tf_dir, 'trainingfile_rand.txt')
+val_bry = os.path.join(vf_dir, 'valfile_rand.txt')
 
 traintext = open(train_bry, "r")
 valtext = open(val_bry, "r")
@@ -609,6 +828,8 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        target = target.view(-1, 1)
+        
 
         # formatting and modifying output from dict
         input_img = data
@@ -668,6 +889,7 @@ for epoch in range(n_epochs):
             data = D['image']
             target = D['landmarks']
             
+            
             # test prints
             
             
@@ -679,7 +901,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = bryum_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -701,10 +936,12 @@ valtext.close()
 
 #sanionia/brown moss model
 
+print("net 6 out of 11: sanionia moss (brown moss)")
 
 
-train_san = os.path.join(tf_dir, 'brmo.txt')
-val_san = os.path.join(vf_dir, 'brmo.txt')
+
+train_san = os.path.join(tf_dir, 'trainingfile_brmo.txt')
+val_san = os.path.join(vf_dir, 'valfile_brmo.txt')
 
 traintext = open(train_san, "r")
 valtext = open(val_san, "r")
@@ -766,6 +1003,8 @@ for epoch in range(n_epochs):
         # extracting from dictionary 
         data = D['image']
         target = D['landmarks']
+        
+        target = target.view(-1, 1)
         
 
         # formatting and modifying output from dict
@@ -837,7 +1076,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = sanionia_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -858,9 +1110,11 @@ valtext.close()
 
 #hairgrass model
 
+print("net 7 out of 11: hairgrass")
 
-train_grass = os.path.join(tf_dir, 'gras.txt')
-val_grass = os.path.join(vf_dir, 'gras.txt')
+
+train_grass = os.path.join(tf_dir, 'trainingfile_gras.txt')
+val_grass = os.path.join(vf_dir, 'valfile_gras.txt')
 
 traintext = open(train_grass, "r")
 valtext = open(val_grass, "r")
@@ -923,6 +1177,8 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        
+        target = target.view(-1, 1)
 
         # formatting and modifying output from dict
         input_img = data
@@ -993,7 +1249,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = grass_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -1018,8 +1287,11 @@ valtext.close()
 #abbr to PS, model name polytrich_model
 
 
-train_PS = os.path.join(tf_dir, 'pomo.txt')
-val_PS = os.path.join(vf_dir, 'pomo.txt')
+print("net 8 out of 11, polytrichium strictum")
+
+
+train_PS = os.path.join(tf_dir, 'trainingfile_pomo.txt')
+val_PS = os.path.join(vf_dir, 'valfile_pomo.txt')
 
 traintext = open(train_PS, "r")
 valtext = open(val_PS, "r")
@@ -1082,6 +1354,7 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        target = target.view(-1, 1)
 
         # formatting and modifying output from dict
         input_img = data
@@ -1152,7 +1425,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = polytrich_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -1177,8 +1463,11 @@ valtext.close()
 #abbr to chor, model name chor_model
 
 
-train_chor = os.path.join(tf_dir, 'chmo.txt')
-val_chor = os.path.join(vf_dir, 'chmo.txt')
+print("net 9 out of 11, chorisodontium aciphyllum")
+
+
+train_chor = os.path.join(tf_dir, 'trainingfile_chmo.txt')
+val_chor = os.path.join(vf_dir, 'valfile_chmo.txt')
 
 traintext = open(train_chor, "r")
 valtext = open(val_chor, "r")
@@ -1241,6 +1530,7 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        target = target.view(-1, 1)
 
         # formatting and modifying output from dict
         input_img = data
@@ -1311,7 +1601,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = chor_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -1333,9 +1636,11 @@ valtext.close()
 
 #brown lichen, abbr blichen
 
+print("net 10 out of 11, brown lichen")
 
-train_blichen = os.path.join(tf_dir, 'brli.txt')
-val_blichen = os.path.join(vf_dir, 'brli.txt')
+
+train_blichen = os.path.join(tf_dir, 'trainingfile_brli.txt')
+val_blichen = os.path.join(vf_dir, 'valfile_brli.txt')
 
 traintext = open(train_blichen, "r")
 valtext = open(val_blichen, "r")
@@ -1398,6 +1703,7 @@ for epoch in range(n_epochs):
         data = D['image']
         target = D['landmarks']
         
+        target = target.view(-1, 1)
 
         # formatting and modifying output from dict
         input_img = data
@@ -1468,7 +1774,20 @@ for epoch in range(n_epochs):
             
             # returns the output if < 1, else 1 - converts output to probability
             outputs = blichen_model(data)
-            _, predicted = torch.max(outputs.data, 1)
+            
+            predicted, sp = torch.max(outputs.data, 1)
+            
+            presize = predicted.size()
+            psize = list(presize)[0]
+            
+            for index in range(psize):
+                entry = predicted[index]
+                value = entry.item()
+                if (value < 0.5):
+                    value = 0.0
+                else:
+                    value = 1.0
+                predicted[index] = torch.tensor(value)
             
             # does the addition
             total += target.size(0)
@@ -1490,8 +1809,11 @@ valtext.close()
 #algae on rocks, abbr alg
 
 
-train_alg = os.path.join(tf_dir, 'alga.txt')
-val_alg = os.path.join(vf_dir, 'alga.txt')
+print("net 11 out of 11, algae on rocks")
+
+
+train_alg = os.path.join(tf_dir, 'trainingfile_alga.txt')
+val_alg = os.path.join(vf_dir, 'valfile_alga.txt')
 
 traintext = open(train_alg, "r")
 valtext = open(val_alg, "r")
@@ -1555,6 +1877,8 @@ for epoch in range(n_epochs):
         target = D['landmarks']
         
 
+        target = target.view(-1, 1)
+        
         # formatting and modifying output from dict
         input_img = data
         target = torch.tensor(target)
