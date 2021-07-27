@@ -27,7 +27,7 @@ model_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/Making
 
 
 #define batch size, num workers
-batch_size = 49
+batch_size = 7
 num_workers = 0
 
 # define transforms:
@@ -65,7 +65,7 @@ val_data_rock = AntarcticPlotDataset(valtext, val_dir, transform=test_transform)
 
 # load the data in batches: 
 
-tl_rock = torch.utils.data.DataLoader(train_data_rock, num_workers = 0, batch_size=batch_size, shuffle=True)
+tl_rock = torch.utils.data.DataLoader(train_data_rock, num_workers = 0, batch_size=batch_size, shuffle=False)
 
 vl_rock = torch.utils.data.DataLoader(val_data_rock,  num_workers = 0, batch_size=batch_size)
 
@@ -150,14 +150,13 @@ for epoch in range(n_epochs):
         # clear the gradients of all optimized variables
         optimizer.zero_grad()
         
-        # forward pass: compute predicted outputs by passing inputs to the model        
+        # forward pass: compute predicted outputs by passing inputs to the model     
         outputs = rock_model(input_img)
         
         # calculate the loss
         loss = criterion(outputs, target)
+        print(loss.item())
         
-        print(outputs)
-        print(target)
         # backward pass: compute gradient of the loss with respect to model parameters
         loss.backward()
         
