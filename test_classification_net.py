@@ -10,6 +10,7 @@ from PIL import Image
 import cv2
 import os
 from antarcticplotdataset_iterable import AntarcticPlotDataset
+from antarcticnet import AntarcticNet
 
 
 
@@ -26,7 +27,7 @@ model_dir = 'C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/Making
 
 
 #define batch size, num workers
-batch_size = 64
+batch_size = 49
 num_workers = 0
 
 # define transforms:
@@ -47,7 +48,7 @@ test_transform = transforms.Compose([transforms.Resize((224,224)), transforms.To
 
 
 
-train_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfiles/trainingfile_rock.txt"
+train_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/trainingfiles/trainingfile_rock_small.txt"
 val_rock = "C:/Users/arnav/OneDrive/Documents/College/Summer 2021/Clarks/MakingEllipse/txtdata/valfiles/valfile_rock.txt"
 
 traintext = open(train_rock, "r")
@@ -77,17 +78,17 @@ vl_rock = torch.utils.data.DataLoader(val_data_rock,  num_workers = 0, batch_siz
 
 # define model
 
-rock_model = models.resnet18(pretrained=False)
-rock_model.fc = nn.Linear(in_features=512, out_features=1)
+rock_model = AntarcticNet()
+
 
 # specify loss function
 criterion = nn.BCEWithLogitsLoss()
 
 # specify optimizer
-optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.001, momentum=0.9)
+optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.001, momentum=0.09)
 
 # specify scheduler
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 
 # save model
 PATH = os.path.join(model_dir, 'rock_model.pt')
@@ -95,7 +96,7 @@ torch.save(rock_model, PATH)
 
 
 # number of epochs to train the model, number of iterations per epoch
-n_epochs = 1
+n_epochs = 10
 n_iterations = int(len(train_data_rock)/batch_size)
 
 # lists to keep track of training progress:
@@ -137,13 +138,14 @@ for epoch in range(n_epochs):
 
         # formatting and modifying output from dict
         input_img = data
+        
         target = torch.tensor(target)
         #data = data.float()
                 
         #### TRAINING PROPER ####
         #########################
         
-        print("Epoch:", epoch + 1, "Iteration:", iter, "out of:", n_iterations)
+        print("Epoch:", epoch + 1, "Iteration:", iter + 1, "out of:", n_iterations)
         
         # clear the gradients of all optimized variables
         optimizer.zero_grad()
@@ -154,6 +156,8 @@ for epoch in range(n_epochs):
         # calculate the loss
         loss = criterion(outputs, target)
         
+        print(outputs)
+        print(target)
         # backward pass: compute gradient of the loss with respect to model parameters
         loss.backward()
         
@@ -161,7 +165,7 @@ for epoch in range(n_epochs):
         optimizer.step()
         
         # update running training loss
-        train_loss += loss.item()*input_img.size(0)
+        train_loss += loss.item() #*input_img.size(0)
       
     #  scheduler - perform a its step in here - controls rate of learning
     scheduler.step()
@@ -217,11 +221,15 @@ for epoch in range(n_epochs):
             for index in range(psize):
                 entry = predicted[index]
                 value = entry.item()
-                if (value < 0.5):
+                if (value < 0):
                     value = 0.0
                 else:
                     value = 1.0
                 predicted[index] = torch.tensor(value)
+            
+            
+            #print(outputs)
+            #print(target)
             
             # does the addition
             total += target.size(0)
