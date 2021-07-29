@@ -82,13 +82,15 @@ rock_model = AntarcticNet()
 
 
 # specify loss function
-criterion = nn.BCEWithLogitsLoss()
+#criterion = nn.BCEWithLogitsLoss()
+#criterion = nn.MSELoss()
+criterion = nn.BCELoss()
 
 # specify optimizer
-optimizer = torch.optim.SGD(rock_model.parameters(), lr=0.001, momentum=0.09)
+optimizer = torch.optim.SGD(rock_model.parameters(), lr= 0.05, momentum=0.9)
 
 # specify scheduler
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
 # save model
 PATH = os.path.join(model_dir, 'rock_model.pt')
@@ -139,7 +141,7 @@ for epoch in range(n_epochs):
         # formatting and modifying output from dict
         input_img = data
         
-        target = torch.tensor(target)
+        target = torch.tensor(target).float()
         #data = data.float()
                 
         #### TRAINING PROPER ####
@@ -152,10 +154,11 @@ for epoch in range(n_epochs):
         
         # forward pass: compute predicted outputs by passing inputs to the model     
         outputs = rock_model(input_img)
+        print(outputs)
         
         # calculate the loss
         loss = criterion(outputs, target)
-        print(loss.item())
+        
         
         # backward pass: compute gradient of the loss with respect to model parameters
         loss.backward()
