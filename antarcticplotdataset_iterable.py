@@ -7,7 +7,6 @@ import cv2
 import numpy as np 
 import math
 import torch
-import cv2
 from PIL import Image
 import torchvision.transforms as transforms
 
@@ -37,12 +36,11 @@ class AntarcticPlotDataset(Dataset):
         photoData = txt_file
         
         
-        
         #reading the text file line by line 
         
-        for line in photoData:
+        for line in open(photoData):
             info = line
-            
+
     
             infolist = info.split(" ")
             
@@ -57,17 +55,22 @@ class AntarcticPlotDataset(Dataset):
             
             
             #going into the folder named after the prent image
-            img_dir = os.path.join(root_dir, containingFolder)
-            
+            img_dir = os.path.join(root_dir, containingFolder)           
             
             #using the text file to get the name of the image
-            img = io.imread(os.path.join(img_dir, imgname))
+            img = cv2.imread(os.path.join(img_dir, imgname))
+    
             
             #formatting and transforming the images
             img = np.array(img)
             trans = transforms.ToPILImage()
             img = trans(img)
+            #print(np.asarray(img))
+            #print(img.size)
+            
+            
             img = self.transform(img)
+
             finaldata.append(img)
             
             
@@ -102,15 +105,14 @@ class AntarcticPlotDataset(Dataset):
             img = self.newdata[i][0]
             
             #extracting target
-            landmarks = float(self.newdata[i][1])
+            landmarks = (self.newdata[i][1])
             target = []
             target.append(landmarks)
             #storing both image in target in a dictionary format
             sample = {'image' : img, 'landmarks' : landmarks}
-            
             #returning the dictionary - the enumerator wants a dictionary object
             return sample
-        
+
     
     
     
